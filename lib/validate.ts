@@ -33,19 +33,19 @@ export function parsePreferenceInput(
   const errors: string[] = [];
   const r = (raw ?? {}) as Record<string, unknown>;
 
-  if (!isPersonName(r.name)) errors.push(`name must be one of ${PEOPLE.join(", ")}`);
-  if (!isAmount(r.budgetMin)) errors.push(`budgetMin must be a number from 0 to ${MAX_AMOUNT}`);
-  if (!isAmount(r.budgetMax)) errors.push(`budgetMax must be a number from 0 to ${MAX_AMOUNT}`);
+  if (!isPersonName(r.name)) errors.push(`Pick your name (${PEOPLE.join(", ")})`);
+  if (!isAmount(r.budgetMin)) errors.push(`Enter a “Comfortable from” amount (₹0 to ₹1 crore)`);
+  if (!isAmount(r.budgetMax)) errors.push(`Enter an “Up to” amount (₹0 to ₹1 crore)`);
   if (isAmount(r.budgetMin) && isAmount(r.budgetMax) && r.budgetMin > r.budgetMax) {
-    errors.push("budgetMin can't be more than budgetMax");
+    errors.push("“Comfortable from” can't be more than “Up to”");
   }
-  if (isAmount(r.budgetMax) && r.budgetMax <= 0) errors.push("budgetMax must be more than 0");
+  if (isAmount(r.budgetMax) && r.budgetMax <= 0) errors.push("“Up to” must be more than ₹0");
 
   const cap = r.budgetHardCap;
   const hasCap = cap !== undefined && cap !== null;
-  if (hasCap && !isAmount(cap)) errors.push(`budgetHardCap must be a number from 0 to ${MAX_AMOUNT}`);
+  if (hasCap && !isAmount(cap)) errors.push(`“Absolute max” must be ₹0 to ₹1 crore, or blank`);
   if (hasCap && isAmount(cap) && isAmount(r.budgetMax) && cap < r.budgetMax) {
-    errors.push("Hard cap can't be lower than your budget max");
+    errors.push("“Absolute max” can't be lower than “Up to” (leave it blank if they're the same)");
   }
 
   const ranges = Array.isArray(r.freeDateRanges) ? (r.freeDateRanges as Record<string, unknown>[]) : null;
@@ -67,11 +67,11 @@ export function parsePreferenceInput(
 
   const ranking = Array.isArray(r.destinationTypeRanking) ? r.destinationTypeRanking : null;
   if (!ranking || !ranking.every(isDestinationType) || new Set(ranking).size !== ranking.length) {
-    errors.push("destinationTypeRanking must be a list of distinct beach / mountains / city");
+    errors.push("Trip types must be beach, mountains or city, each ranked once");
   }
   const excluded = r.excludedDestinationTypes ?? [];
   if (!Array.isArray(excluded) || !excluded.every(isDestinationType)) {
-    errors.push("excludedDestinationTypes must be a list of beach / mountains / city");
+    errors.push("Dealbreakers must be beach, mountains or city");
   } else if (ranking && excluded.some((t) => ranking.includes(t))) {
     errors.push("A destination type can't be both ranked and excluded");
   }

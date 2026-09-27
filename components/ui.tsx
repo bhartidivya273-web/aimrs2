@@ -16,7 +16,7 @@ export function Header({ active }: { active: "intake" | "results" }) {
   const tab = (href: string, label: string, isActive: boolean) => (
     <Link
       href={href}
-      className={`rounded-full px-3 py-1.5 text-sm font-medium ${
+      className={`whitespace-nowrap rounded-full px-3 py-1.5 text-sm font-medium ${
         isActive ? "bg-teal-700 text-white" : "text-slate-600 hover:bg-slate-200"
       }`}
     >
@@ -24,10 +24,10 @@ export function Header({ active }: { active: "intake" | "results" }) {
     </Link>
   );
   return (
-    <header className="mb-4 flex items-center justify-between gap-2">
-      <h1 className="text-lg font-bold tracking-tight">🧳 Group Trip</h1>
+    <header className="mb-4 flex items-center justify-between gap-1">
+      <h1 className="whitespace-nowrap text-lg font-bold tracking-tight">🧳 Trip</h1>
       <nav className="flex gap-1">
-        {tab("/", "My preferences", active === "intake")}
+        {tab("/", "My prefs", active === "intake")}
         {tab("/results", "Results", active === "results")}
       </nav>
     </header>

@@ -154,22 +154,30 @@ export default function IntakePage() {
             <p className="mb-3 text-xs text-slate-500">A trip must fit fully inside one of these ranges.</p>
             <div className="space-y-3">
               {form.ranges.map((r, i) => (
-                <div key={i} className="flex items-end gap-2">
-                  <label className="flex-1 text-xs font-medium text-slate-600">
-                    From
-                    <input type="date" required value={r.start} onChange={(e) => setRange(i, "start", e.target.value)}
-                      className="mt-1 block w-full rounded-lg border border-slate-300 px-2 py-2 text-base" />
-                  </label>
-                  <label className="flex-1 text-xs font-medium text-slate-600">
-                    To
-                    <input type="date" required value={r.end} min={r.start || undefined} onChange={(e) => setRange(i, "end", e.target.value)}
-                      className="mt-1 block w-full rounded-lg border border-slate-300 px-2 py-2 text-base" />
-                  </label>
-                  <button type="button" aria-label={`Remove date range ${i + 1}`} disabled={form.ranges.length === 1}
-                    onClick={() => update({ ranges: form.ranges.filter((_, j) => j !== i) })}
-                    className="mb-0.5 h-10 w-10 shrink-0 rounded-lg border border-slate-300 text-slate-500 disabled:opacity-30">
-                    ✕
-                  </button>
+                <div key={i}>
+                  {form.ranges.length > 1 && (
+                    <div className="mb-1 flex items-center justify-between">
+                      <span className="text-xs font-semibold text-slate-500">Range {i + 1}</span>
+                      <button type="button" aria-label={`Remove date range ${i + 1}`}
+                        onClick={() => update({ ranges: form.ranges.filter((_, j) => j !== i) })}
+                        className="-my-2 px-2 py-2 text-xs font-medium text-red-700">
+                        Remove
+                      </button>
+                    </div>
+                  )}
+                  {/* min-w-0: date inputs have a wide intrinsic size that overflows 320–375px phones */}
+                  <div className="grid grid-cols-2 gap-2">
+                    <label className="min-w-0 text-xs font-medium text-slate-600">
+                      From
+                      <input type="date" required value={r.start} onChange={(e) => setRange(i, "start", e.target.value)}
+                        className="mt-1 block w-full min-w-0 rounded-lg border border-slate-300 bg-white px-2 py-2 text-base" />
+                    </label>
+                    <label className="min-w-0 text-xs font-medium text-slate-600">
+                      To
+                      <input type="date" required value={r.end} min={r.start || undefined} onChange={(e) => setRange(i, "end", e.target.value)}
+                        className="mt-1 block w-full min-w-0 rounded-lg border border-slate-300 bg-white px-2 py-2 text-base" />
+                    </label>
+                  </div>
                 </div>
               ))}
             </div>
