@@ -1,21 +1,19 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { upsertPreference } from "@/lib/engine";
+import { submitPreferences } from "@/lib/actions";
 import { getStore } from "@/lib/store";
 import { buildState } from "@/lib/state";
-import { parsePreferenceInput } from "@/lib/validate";
 
 export const dynamic = "force-dynamic";
 
-/** Upsert one person's preferences. Always clears that person's "I'm in". */
 export async function PUT(req: NextRequest) {
-  const body = await req.json().catch(() => null);
-  const parsed = parsePreferenceInput(body);
-  if (!parsed.ok) return NextResponse.json({ errors: parsed.errors }, { status: 400 });
-
-  const store = getStore();
-  const next = upsertPreference(await store.getAll(), parsed.value, new Date().toISOString());
-  await store.put(next.find((p) => p.name === parsed.value.name)!);
-  return NextResponse.json(buildState(store.kind, next));
+  let body: unknown;
+  try {
+    body = await req.json();
+  } catch {
+    return NextResponse.json({ errors: ["Request body must be JSON"] }, { status: 400 });
+  }
+  const r = await submitPreferences(getStore(), body, new Date().toISOString());
+  return NextResponse.json(r.body, { status: r.status });
 }
 
 /**

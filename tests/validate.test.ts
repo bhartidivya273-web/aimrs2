@@ -33,3 +33,13 @@ describe("formatINR", () => {
     expect(formatINR(150000)).toBe("₹1,50,000");
   });
 });
+
+describe("input limits", () => {
+  const base = fixture.preferences[0];
+  it("rejects too many date ranges and absurd amounts", () => {
+    const many = Array.from({ length: 21 }, () => ({ start: "2026-12-04", end: "2026-12-06" }));
+    expect(parsePreferenceInput({ ...base, freeDateRanges: many }).ok).toBe(false);
+    expect(parsePreferenceInput({ ...base, freeDateRanges: many.slice(0, 20) }).ok).toBe(true);
+    expect(parsePreferenceInput({ ...base, budgetMax: 1e15, budgetHardCap: 1e15 }).ok).toBe(false);
+  });
+});

@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { Card, Header, NamePicker, StorageBanner } from "@/components/ui";
 import { useAppState, useRememberedName } from "@/components/client";
 import { formatINR } from "@/lib/format";
+import { MAX_DATE_RANGES } from "@/lib/validate";
 import { DESTINATION_TYPES, type DestinationType, type PersonName, type PersonPreference } from "@/lib/types";
 
 interface FormState {
@@ -172,8 +173,9 @@ export default function IntakePage() {
                 </div>
               ))}
             </div>
-            <button type="button" onClick={() => update({ ranges: [...form.ranges, { start: "", end: "" }] })}
-              className="mt-3 text-sm font-medium text-teal-700">
+            <button type="button" disabled={form.ranges.length >= MAX_DATE_RANGES}
+              onClick={() => update({ ranges: [...form.ranges, { start: "", end: "" }] })}
+              className="mt-3 text-sm font-medium text-teal-700 disabled:text-slate-400">
               + Add another date range
             </button>
           </Card>

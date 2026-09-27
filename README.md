@@ -41,7 +41,9 @@ app/api/state           GET   everything the UI needs (records + engine output +
 app/api/preferences     PUT   upsert one person (clears their "I'm in"); DELETE wipe all (guarded)
 app/api/confirm         POST  {name, optionId|null} tap "I'm in" / back out
 lib/engine.ts           pure matching engine + decision lock
-lib/store.ts            Upstash Redis hash (one field per person) or in-memory fallback
+lib/actions.ts          submit / confirm logic (storage-agnostic, unit-tested)
+lib/store-core.ts       two hashes (preferences, versioned confirmations), one field per person
+lib/store.ts            picks Upstash Redis or the in-memory fallback from env vars
 data/trip-options.json  fixed seed options (placeholder, for Riya to confirm)
 ```
 
@@ -69,4 +71,4 @@ Every elimination is recorded as `{optionId, person, rule, detail}`.
 
 ## Tests
 
-`tests/engine.test.ts` reproduces every number in `data/test-preferences.json → expected`: survivors, ranking, averages, minimums, per-person scores and single-constraint eliminations. It also covers a zero-survivor case. `tests/decision.test.ts` covers the 5-of-5 lock: 4/5 isn't Decided, 5/5 is, and switching, backing out or editing unlocks it.
+`tests/engine.test.ts` reproduces every number in `data/test-preferences.json → expected`: survivors, ranking, averages, minimums, per-person scores and single-constraint eliminations. It also covers a zero-survivor case. `tests/stress.test.ts` fuzzes the engine and the lock with 4,000 random scenarios. `tests/store.test.ts` forces the edit-vs-confirm race and runs random-latency concurrency. `tests/decision.test.ts` covers the 5-of-5 lock: 4/5 isn't Decided, 5/5 is, and switching, backing out or editing unlocks it.

@@ -1,6 +1,9 @@
 import { DESTINATION_TYPES, PEOPLE, type DateRange, type DestinationType, type PersonName, type PreferenceInput } from "./types";
 
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
+export const MAX_DATE_RANGES = 20;
+/** ₹1 crore per person: far above any real trip, low enough to reject junk. */
+export const MAX_AMOUNT = 10_000_000;
 
 export function isPersonName(v: unknown): v is PersonName {
   return typeof v === "string" && (PEOPLE as readonly string[]).includes(v);
@@ -17,7 +20,7 @@ function isValidIsoDate(v: unknown): v is string {
 }
 
 function isAmount(v: unknown): v is number {
-  return typeof v === "number" && Number.isFinite(v) && v >= 0;
+  return typeof v === "number" && Number.isFinite(v) && v >= 0 && v <= MAX_AMOUNT;
 }
 
 /**
@@ -31,8 +34,8 @@ export function parsePreferenceInput(
   const r = (raw ?? {}) as Record<string, unknown>;
 
   if (!isPersonName(r.name)) errors.push(`name must be one of ${PEOPLE.join(", ")}`);
-  if (!isAmount(r.budgetMin)) errors.push("budgetMin must be a non-negative number");
-  if (!isAmount(r.budgetMax)) errors.push("budgetMax must be a non-negative number");
+  if (!isAmount(r.budgetMin)) errors.push(`budgetMin must be a number from 0 to ${MAX_AMOUNT}`);
+  if (!isAmount(r.budgetMax)) errors.push(`budgetMax must be a number from 0 to ${MAX_AMOUNT}`);
   if (isAmount(r.budgetMin) && isAmount(r.budgetMax) && r.budgetMin > r.budgetMax) {
     errors.push("budgetMin can't be more than budgetMax");
   }
@@ -40,13 +43,17 @@ export function parsePreferenceInput(
 
   const cap = r.budgetHardCap;
   const hasCap = cap !== undefined && cap !== null;
-  if (hasCap && !isAmount(cap)) errors.push("budgetHardCap must be a non-negative number");
+  if (hasCap && !isAmount(cap)) errors.push(`budgetHardCap must be a number from 0 to ${MAX_AMOUNT}`);
   if (hasCap && isAmount(cap) && isAmount(r.budgetMax) && cap < r.budgetMax) {
     errors.push("Hard cap can't be lower than your budget max");
   }
 
   const ranges = Array.isArray(r.freeDateRanges) ? (r.freeDateRanges as Record<string, unknown>[]) : null;
   if (!ranges || ranges.length === 0) errors.push("Add at least one free date range");
+  if (ranges && ranges.length > MAX_DATE_RANGES) {
+    errors.push(`At most ${MAX_DATE_RANGES} date ranges`);
+    return { ok: false, errors };
+  }
   const cleanRanges: DateRange[] = [];
   ranges?.forEach((range, i) => {
     if (!isValidIsoDate(range?.start) || !isValidIsoDate(range?.end)) {

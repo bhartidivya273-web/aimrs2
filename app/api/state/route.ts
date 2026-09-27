@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
+import { getState } from "@/lib/actions";
 import { getStore } from "@/lib/store";
-import { buildState } from "@/lib/state";
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
-  const store = getStore();
-  return NextResponse.json(buildState(store.kind, await store.getAll()));
+  const r = await getState(getStore());
+  return NextResponse.json(r.body, { status: r.status });
 }

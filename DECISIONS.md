@@ -20,16 +20,18 @@ These are the calls I made on autopilot. The ones marked ⭐ are worth reviewing
 - ⭐ **The hard cap must be ≥ budget max.** A cap below your own "up to" would contradict it. Blank means the cap equals the budget max, as in the PRD.
 - The budget min must be ≤ the max, each date range needs start ≤ end, and at least one range is required.
 - A type can't be both ranked and excluded. In the form, ticking a type as a dealbreaker removes it from your ranking. The ranking may be empty (every type then scores "unranked" = 10).
+- Limits: at most 20 date ranges, and amounts from ₹0 to ₹1 crore, to stop junk input or storage bloat.
 - Client input can never set `confirmedOptionId`/`updatedAt`. Unknown fields are dropped.
 
 ## Confirmation / lock
 - **You can only confirm one of the currently shown top options.** Confirmations on options that are no longer shown never count toward a lock.
 - **Any resubmit clears your confirmation, even with no changes.** The PRD says editing clears it, and "resubmitted" is simpler and more honest than diffing. The form warns before you save.
 - **"Back out"** (optionId `null`) is supported alongside switching to a different option.
+- If your "I'm in" option drops out of the top 3 (someone else's edit), the results page tells you and asks you to pick again. It doesn't count toward a lock.
 - **The same "I'm in" button says "Switch to X"** if you're already in on another option.
 
 ## Storage / API
-- Redis layout: one hash `group-trip:preferences` with one field per person. Each write touches only that person's field, so two friends submitting at the same moment can't overwrite each other.
+- Redis layout: two hashes, each with one field per person. `group-trip:preferences` holds the records and `group-trip:confirmations` holds `{optionId, version}`. A confirmation counts only while its `version` equals the person's current `updatedAt`. This fixes a lost-update race found during stress testing: confirm used to rewrite the whole record, which could undo an edit saved at the same moment and bring back a stale "I'm in".
 - Accepts both `UPSTASH_REDIS_REST_*` and `KV_REST_API_*` env names, whichever the Vercel integration injects.
 - The in-memory fallback is kept on `globalThis`. On Vercel it's per-instance and short-lived, which is why the banner shows.
 - ⭐ **Wiping all data** (`DELETE /api/preferences`) works freely on the in-memory store. On Redis it needs `RESET_TOKEN` + an `x-reset-token` header, so nobody with the shared WhatsApp link can wipe everyone's data. There's no UI button for it.

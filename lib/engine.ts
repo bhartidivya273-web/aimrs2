@@ -190,7 +190,7 @@ export function decisionStatus(prefs: PersonPreference[], confirmableIds: string
   const confirmations: Record<string, PersonName[]> = {};
   for (const id of confirmableIds) confirmations[id] = [];
   for (const p of sortByPeople(prefs)) {
-    if (p.confirmedOptionId && p.confirmedOptionId in confirmations) {
+    if (p.confirmedOptionId && Object.hasOwn(confirmations, p.confirmedOptionId)) {
       confirmations[p.confirmedOptionId].push(p.name);
     }
   }

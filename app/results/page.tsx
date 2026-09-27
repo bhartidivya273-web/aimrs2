@@ -56,6 +56,11 @@ export default function ResultsPage() {
   const { result, status } = state;
   const myRecord = state.preferences.find((p) => p.name === me);
   const decided = result.top.find((r) => r.option.id === status.decidedOptionId);
+  // An "I'm in" on an option that has since dropped out of the top 3 doesn't count; say so.
+  const staleConfirmation =
+    myRecord?.confirmedOptionId && !result.top.some((r) => r.option.id === myRecord.confirmedOptionId)
+      ? state.options.find((o) => o.id === myRecord.confirmedOptionId)?.destination ?? myRecord.confirmedOptionId
+      : null;
 
   return (
     <>
@@ -100,6 +105,11 @@ export default function ResultsPage() {
             <p className="mb-3 text-sm text-slate-500">Pick your name above to tap &ldquo;I&rsquo;m in&rdquo;.</p>
           )}
           {actionError && <p role="alert" className="mb-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-800">{actionError}</p>}
+          {staleConfirmation && (
+            <p className="mb-3 rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-900">
+              Your &ldquo;I&rsquo;m in&rdquo; was on {staleConfirmation}, which is no longer in the top options. Pick again below.
+            </p>
+          )}
 
           <div className="space-y-4">
             {result.top.map((r, i) => (
@@ -109,7 +119,7 @@ export default function ResultsPage() {
                 ranked={r}
                 inNames={status.confirmations[r.option.id] ?? []}
                 me={me}
-                myConfirmation={myRecord?.confirmedOptionId}
+                myConfirmation={staleConfirmation ? undefined : myRecord?.confirmedOptionId}
                 canConfirm={status.allSubmitted && !!myRecord}
                 busy={busy}
                 isDecided={status.decidedOptionId === r.option.id}
