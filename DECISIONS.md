@@ -33,7 +33,7 @@ These are the calls I made on autopilot. The ones marked ⭐ are worth reviewing
 ## Storage / API
 - ⭐ **Storage is Supabase only** (switched from Upstash at your request). There are two tables: `trip_preferences` and `trip_confirmations`. Each "I'm in" is tagged with the version of the preferences it was made against, and the `set_trip_confirmation` SQL function only accepts it if that version is still current. So an edit racing a confirm can't be lost or leave a stale "I'm in" behind.
 - Only the server touches the database, using the service-role key. RLS is on with no policies, and anon has no grants, so the public key can't read anyone's data. Supabase's advisor flags "RLS enabled, no policy" as INFO; that's intentional.
-- Env: `SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY` (or `SUPABASE_SECRET_KEY`). The in-memory fallback + banner is kept for when they're missing, as the original spec required.
+- Env: `SUPABASE_URL` + `SUPABASE_SECRET_KEY` (preferred; falls back to the legacy `SUPABASE_SERVICE_ROLE_KEY`). The publishable key isn't used, because the browser never talks to Supabase directly. The in-memory fallback + banner is kept for when they're missing, as the original spec required.
 - The in-memory fallback is kept on `globalThis`. On Vercel it's per-instance and short-lived, which is why the banner shows.
 - ⭐ **Wiping all data** (`DELETE /api/preferences`) works freely on the in-memory store. On Supabase it needs `RESET_TOKEN` + an `x-reset-token` header, so nobody with the shared WhatsApp link can wipe everyone's data. There's no UI button for it.
 - **No auth**, per the PRD. Anyone with the link can submit or confirm as any of the 5 names. That's accepted for a 5-friend MVP.

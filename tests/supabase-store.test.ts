@@ -150,7 +150,7 @@ describe.runIf(live)("Supabase store (LIVE)", () => {
   it("full flow against the real database, then cleans up", async () => {
     const store = createSupabaseStore(
       process.env.SUPABASE_URL!,
-      (process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SECRET_KEY)!,
+      (process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY)!,
     );
     expect(await store.getAll(), "tables must be empty before a live test").toEqual([]);
     try {

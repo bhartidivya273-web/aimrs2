@@ -22,7 +22,7 @@ With no env vars set, the app uses an in-memory store and shows a **"Storage not
 | Var | Purpose |
 |---|---|
 | `SUPABASE_URL` | Your project URL, e.g. `https://<ref>.supabase.co`. |
-| `SUPABASE_SERVICE_ROLE_KEY` | Server-only key (or `SUPABASE_SECRET_KEY` for a new `sb_secret_…` key). Never exposed to the browser. |
+| `SUPABASE_SECRET_KEY` | Server-only `sb_secret_…` key (preferred). The legacy `SUPABASE_SERVICE_ROLE_KEY` also works as a fallback. Never exposed to the browser. The publishable key is not needed. |
 | `RESET_TOKEN` | Optional. Enables `DELETE /api/preferences` (wipe everything) on Supabase when sent as the `x-reset-token` header. Without it, wiping only works on the in-memory store. |
 
 See [.env.example](.env.example). Locally, put them in `.env` or `.env.local` (both are git-ignored).
@@ -38,7 +38,7 @@ RLS is on with no policies, and the anon/authenticated roles have no grants, so 
 
 ### On Vercel
 
-Project → **Settings** → **Environment Variables**: add `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` (or connect the Supabase integration), then redeploy. The banner disappears once storage is connected.
+Project → **Settings** → **Environment Variables**: add `SUPABASE_URL` and `SUPABASE_SECRET_KEY`, then redeploy. The banner disappears once storage is connected.
 
 ## How it works
 
