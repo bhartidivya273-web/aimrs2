@@ -1,0 +1,13 @@
+{
+  "_note": "Placeholder seed data. Costs are rough per-person estimates in INR (travel + stay), for Riya to confirm before launch.",
+  "options": [
+    { "id": "goa-nov13", "destination": "Goa", "destinationType": "beach", "start": "2026-11-13", "end": "2026-11-15", "estimatedCostPerPerson": 14000 },
+    { "id": "rishikesh-nov20", "destination": "Rishikesh", "destinationType": "mountains", "start": "2026-11-20", "end": "2026-11-22", "estimatedCostPerPerson": 11000 },
+    { "id": "udaipur-nov20", "destination": "Udaipur", "destinationType": "city", "start": "2026-11-20", "end": "2026-11-22", "estimatedCostPerPerson": 13000 },
+    { "id": "gokarna-dec04", "destination": "Gokarna", "destinationType": "beach", "start": "2026-12-04", "end": "2026-12-06", "estimatedCostPerPerson": 10000 },
+    { "id": "jaipur-dec04", "destination": "Jaipur", "destinationType": "city", "start": "2026-12-04", "end": "2026-12-06", "estimatedCostPerPerson": 9000 },
+    { "id": "manali-dec11", "destination": "Manali", "destinationType": "mountains", "start": "2026-12-11", "end": "2026-12-13", "estimatedCostPerPerson": 18000 },
+    { "id": "pondicherry-dec25", "destination": "Pondicherry", "destinationType": "beach", "start": "2026-12-25", "end": "2026-12-27", "estimatedCostPerPerson": 12000 },
+    { "id": "coorg-jan01", "destination": "Coorg", "destinationType": "mountains", "start": "2027-01-01", "end": "2027-01-03", "estimatedCostPerPerson": 12500 }
+  ]
+}

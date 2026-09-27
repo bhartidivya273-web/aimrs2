@@ -1,0 +1,79 @@
+{
+  "_note": "Test fixture only (not real data). Expected results with trip-options.json and the PRD scoring rules are in 'expected'.",
+  "expected": {
+    "survivors": ["gokarna-dec04", "udaipur-nov20", "jaipur-dec04"],
+    "ranking": [
+      { "id": "gokarna-dec04", "average": 91.0, "minimum": 85 },
+      { "id": "udaipur-nov20", "average": 80.4, "minimum": 70 },
+      { "id": "jaipur-dec04", "average": 80.0, "minimum": 65 }
+    ],
+    "singleConstraintEliminations": {
+      "rishikesh-nov20": "Preethi excludes mountains",
+      "pondicherry-dec25": "Siddharth not free on those dates"
+    },
+    "perPersonScores": {
+      "gokarna-dec04": { "Riya": 100, "Siddharth": 85, "Karan": 85, "Aisha": 85, "Preethi": 100 },
+      "udaipur-nov20": { "Riya": 85, "Siddharth": 70, "Karan": 92, "Aisha": 70, "Preethi": 85 },
+      "jaipur-dec04": { "Riya": 85, "Siddharth": 65, "Karan": 100, "Aisha": 65, "Preethi": 85 }
+    }
+  },
+  "preferences": [
+    {
+      "name": "Riya",
+      "budgetMin": 8000, "budgetMax": 14000, "budgetHardCap": 16000,
+      "freeDateRanges": [
+        { "start": "2026-11-13", "end": "2026-11-15" },
+        { "start": "2026-11-20", "end": "2026-11-22" },
+        { "start": "2026-12-04", "end": "2026-12-06" },
+        { "start": "2026-12-25", "end": "2026-12-27" }
+      ],
+      "destinationTypeRanking": ["beach", "city", "mountains"],
+      "excludedDestinationTypes": []
+    },
+    {
+      "name": "Siddharth",
+      "budgetMin": 10000, "budgetMax": 20000,
+      "freeDateRanges": [
+        { "start": "2026-11-20", "end": "2026-11-22" },
+        { "start": "2026-12-04", "end": "2026-12-06" },
+        { "start": "2026-12-11", "end": "2026-12-13" }
+      ],
+      "destinationTypeRanking": ["mountains", "beach", "city"],
+      "excludedDestinationTypes": []
+    },
+    {
+      "name": "Karan",
+      "budgetMin": 7000, "budgetMax": 12000, "budgetHardCap": 15000,
+      "freeDateRanges": [
+        { "start": "2026-11-20", "end": "2026-11-22" },
+        { "start": "2026-12-04", "end": "2026-12-06" },
+        { "start": "2026-12-25", "end": "2026-12-27" },
+        { "start": "2027-01-01", "end": "2027-01-03" }
+      ],
+      "destinationTypeRanking": ["city", "beach", "mountains"],
+      "excludedDestinationTypes": []
+    },
+    {
+      "name": "Aisha",
+      "budgetMin": 10000, "budgetMax": 22000,
+      "freeDateRanges": [
+        { "start": "2026-11-13", "end": "2026-11-22" },
+        { "start": "2026-12-04", "end": "2026-12-13" },
+        { "start": "2026-12-25", "end": "2027-01-03" }
+      ],
+      "destinationTypeRanking": ["mountains", "beach", "city"],
+      "excludedDestinationTypes": []
+    },
+    {
+      "name": "Preethi",
+      "budgetMin": 8000, "budgetMax": 13000, "budgetHardCap": 15000,
+      "freeDateRanges": [
+        { "start": "2026-11-20", "end": "2026-11-22" },
+        { "start": "2026-12-04", "end": "2026-12-06" },
+        { "start": "2026-12-25", "end": "2026-12-27" }
+      ],
+      "destinationTypeRanking": ["beach", "city"],
+      "excludedDestinationTypes": ["mountains"]
+    }
+  ]
+}
