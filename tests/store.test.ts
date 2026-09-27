@@ -141,22 +141,6 @@ describe("store: bad stored data", () => {
     const all = await store.getAll();
     expect(all.map((p) => p.name)).toEqual(["Riya", "Siddharth", "Aisha", "Preethi"]);
   });
-
-  it("Upstash-style auto-parsed objects are accepted", async () => {
-    const inner = memoryBackend();
-    const backend: HashBackend = {
-      ...inner,
-      async hgetall(k) {
-        const h = await inner.hgetall(k);
-        return h && Object.fromEntries(Object.entries(h).map(([f, v]) => [f, JSON.parse(v as string)]));
-      },
-    };
-    const store = createStore("redis", backend);
-    await seed(store);
-    await confirmChoice(store, { name: "Riya", optionId: GOKARNA });
-    const riya = (await store.getAll()).find((p) => p.name === "Riya")!;
-    expect(riya.confirmedOptionId).toBe(GOKARNA);
-  });
 });
 
 describe("decisionStatus with prototype-named ids", () => {

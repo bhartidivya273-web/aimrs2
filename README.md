@@ -21,16 +21,24 @@ With no env vars set, the app uses an in-memory store and shows a **"Storage not
 
 | Var | Purpose |
 |---|---|
-| `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN` | Upstash Redis REST credentials. The Vercel Marketplace Upstash integration sets these. |
-| `KV_REST_API_URL` / `KV_REST_API_TOKEN` | Also accepted (older Vercel KV naming). |
-| `RESET_TOKEN` | Optional. Enables `DELETE /api/preferences` (wipe everything) on Redis when sent as the `x-reset-token` header. Without it, wiping only works on the in-memory store. |
+| `SUPABASE_URL` | Your project URL, e.g. `https://<ref>.supabase.co`. |
+| `SUPABASE_SERVICE_ROLE_KEY` | Server-only key (or `SUPABASE_SECRET_KEY` for a new `sb_secret_…` key). Never exposed to the browser. |
+| `RESET_TOKEN` | Optional. Enables `DELETE /api/preferences` (wipe everything) on Supabase when sent as the `x-reset-token` header. Without it, wiping only works on the in-memory store. |
 
-See [.env.example](.env.example). For local dev against Redis, put them in `.env.local`.
+See [.env.example](.env.example). Locally, put them in `.env` or `.env.local` (both are git-ignored).
 
-### Connecting Upstash on Vercel
+### Database setup
 
-1. Vercel dashboard → your project → **Storage** → **Create Database** (or **Marketplace**) → **Upstash** → **Upstash for Redis** → create (free tier is fine) → **Connect to project** (all environments).
-2. **Deployments** → latest → **⋯** → **Redeploy**. The banner disappears once storage is connected.
+Run [supabase/migrations/20260927143300_group_trip_storage.sql](supabase/migrations/20260927143300_group_trip_storage.sql) once in the Supabase SQL editor (already applied to the "AI MRS 2" project). It creates:
+- `trip_preferences`: one row per person (`name`, `data` jsonb, `version`).
+- `trip_confirmations`: one "I'm in" per person, tagged with the preferences version it was made against.
+- `save_trip_preference` / `set_trip_confirmation`: RPC functions that make each write atomic.
+
+RLS is on with no policies, and the anon/authenticated roles have no grants, so only the server's service-role key can touch the data.
+
+### On Vercel
+
+Project → **Settings** → **Environment Variables**: add `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` (or connect the Supabase integration), then redeploy. The banner disappears once storage is connected.
 
 ## How it works
 
@@ -42,8 +50,9 @@ app/api/preferences     PUT   upsert one person (clears their "I'm in"); DELETE 
 app/api/confirm         POST  {name, optionId|null} tap "I'm in" / back out
 lib/engine.ts           pure matching engine + decision lock
 lib/actions.ts          submit / confirm logic (storage-agnostic, unit-tested)
-lib/store-core.ts       two hashes (preferences, versioned confirmations), one field per person
-lib/store.ts            picks Upstash Redis or the in-memory fallback from env vars
+lib/store-core.ts       storage model (preferences + versioned confirmations) and the in-memory fallback
+lib/supabase-store.ts   Supabase store over its REST API (plain fetch, no SDK)
+lib/store.ts            picks Supabase or the in-memory fallback from env vars
 data/trip-options.json  fixed seed options (placeholder, for Riya to confirm)
 ```
 
@@ -71,4 +80,4 @@ Every elimination is recorded as `{optionId, person, rule, detail}`.
 
 ## Tests
 
-`tests/engine.test.ts` reproduces every number in `data/test-preferences.json → expected`: survivors, ranking, averages, minimums, per-person scores and single-constraint eliminations. It also covers a zero-survivor case. `tests/stress.test.ts` fuzzes the engine and the lock with 4,000 random scenarios. `tests/store.test.ts` forces the edit-vs-confirm race and runs random-latency concurrency. `tests/decision.test.ts` covers the 5-of-5 lock: 4/5 isn't Decided, 5/5 is, and switching, backing out or editing unlocks it.
+`tests/engine.test.ts` reproduces every number in `data/test-preferences.json → expected`: survivors, ranking, averages, minimums, per-person scores and single-constraint eliminations. It also covers a zero-survivor case. `tests/stress.test.ts` fuzzes the engine and the lock with 4,000 random scenarios. `tests/store.test.ts` forces the edit-vs-confirm race and runs random-latency concurrency. `tests/supabase-store.test.ts` covers the Supabase store against a fake REST API; its live test against the real project is opt-in (`SUPABASE_LIVE_TEST=1`) and refuses to run unless the tables are empty. `tests/decision.test.ts` covers the 5-of-5 lock: 4/5 isn't Decided, 5/5 is, and switching, backing out or editing unlocks it.

@@ -1,7 +1,7 @@
 export const PEOPLE = ["Riya", "Siddharth", "Karan", "Aisha", "Preethi"] as const;
 export type PersonName = (typeof PEOPLE)[number];
 
-export type StorageKind = "redis" | "memory";
+export type StorageKind = "supabase" | "memory";
 
 export const DESTINATION_TYPES = ["beach", "mountains", "city"] as const;
 export type DestinationType = (typeof DESTINATION_TYPES)[number];

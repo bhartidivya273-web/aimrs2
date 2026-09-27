@@ -1,32 +1,21 @@
 import "server-only";
-import { Redis } from "@upstash/redis";
-import { createStore, memoryBackend, type HashBackend, type PreferenceStore } from "./store-core";
+import { createStore, memoryBackend, type PreferenceStore } from "./store-core";
+import { createSupabaseStore } from "./supabase-store";
 
 export type { PreferenceStore } from "./store-core";
-
-function redisBackend(redis: Redis): HashBackend {
-  return {
-    hgetall: (key) => redis.hgetall<Record<string, unknown>>(key),
-    async hset(key, field, value) {
-      await redis.hset(key, { [field]: value });
-    },
-    async hdel(key, field) {
-      await redis.hdel(key, field);
-    },
-    async del(...keys) {
-      await redis.del(...keys);
-    },
-  };
-}
 
 // Survives dev hot reloads; resets on server restart / new serverless instance.
 const g = globalThis as unknown as { __tripMemory?: Map<string, Map<string, string>> };
 
-/** Upstash via the Vercel Marketplace sets either UPSTASH_REDIS_REST_* or KV_REST_API_*. */
+/**
+ * Supabase when SUPABASE_URL + a server key are set (the Vercel Supabase integration
+ * sets SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY); otherwise the in-memory fallback,
+ * which the UI flags with "Storage not connected — data may reset".
+ */
 export function getStore(): PreferenceStore {
-  const url = process.env.UPSTASH_REDIS_REST_URL || process.env.KV_REST_API_URL;
-  const token = process.env.UPSTASH_REDIS_REST_TOKEN || process.env.KV_REST_API_TOKEN;
-  return url && token
-    ? createStore("redis", redisBackend(new Redis({ url, token })))
+  const url = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SECRET_KEY;
+  return url && key
+    ? createSupabaseStore(url, key)
     : createStore("memory", memoryBackend((g.__tripMemory ??= new Map())));
 }

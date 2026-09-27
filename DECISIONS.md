@@ -4,7 +4,7 @@ These are the calls I made on autopilot. The ones marked ⭐ are worth reviewing
 
 ## Environment
 - **Node.js wasn't installed** (and neither was Homebrew). I installed the official Node v24 LTS binary from nodejs.org into `~/.local/node` (checksum verified, no sudo, no system changes). To use it in your shell, add `export PATH="$HOME/.local/node/bin:$PATH"` to `~/.zshrc`, or install Node your usual way.
-- Scaffolded by hand instead of with `create-next-app` to keep dependencies minimal: next, react, react-dom and @upstash/redis, plus server-only. The dev dependencies are typescript, tailwind v4, vitest and @types.
+- Scaffolded by hand instead of with `create-next-app` to keep dependencies minimal: next, react, react-dom and server-only (Supabase is called over its REST API with plain fetch, so there's no SDK). The dev dependencies are typescript, tailwind v4, vitest and @types.
 - No ESLint. It isn't needed for the quality bar, and leaving it out keeps deps minimal.
 
 ## Engine / rules
@@ -31,10 +31,11 @@ These are the calls I made on autopilot. The ones marked ⭐ are worth reviewing
 - **The same "I'm in" button says "Switch to X"** if you're already in on another option.
 
 ## Storage / API
-- Redis layout: two hashes, each with one field per person. `group-trip:preferences` holds the records and `group-trip:confirmations` holds `{optionId, version}`. A confirmation counts only while its `version` equals the person's current `updatedAt`. This fixes a lost-update race found during stress testing: confirm used to rewrite the whole record, which could undo an edit saved at the same moment and bring back a stale "I'm in".
-- Accepts both `UPSTASH_REDIS_REST_*` and `KV_REST_API_*` env names, whichever the Vercel integration injects.
+- ⭐ **Storage is Supabase only** (switched from Upstash at your request). There are two tables: `trip_preferences` and `trip_confirmations`. Each "I'm in" is tagged with the version of the preferences it was made against, and the `set_trip_confirmation` SQL function only accepts it if that version is still current. So an edit racing a confirm can't be lost or leave a stale "I'm in" behind.
+- Only the server touches the database, using the service-role key. RLS is on with no policies, and anon has no grants, so the public key can't read anyone's data. Supabase's advisor flags "RLS enabled, no policy" as INFO; that's intentional.
+- Env: `SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY` (or `SUPABASE_SECRET_KEY`). The in-memory fallback + banner is kept for when they're missing, as the original spec required.
 - The in-memory fallback is kept on `globalThis`. On Vercel it's per-instance and short-lived, which is why the banner shows.
-- ⭐ **Wiping all data** (`DELETE /api/preferences`) works freely on the in-memory store. On Redis it needs `RESET_TOKEN` + an `x-reset-token` header, so nobody with the shared WhatsApp link can wipe everyone's data. There's no UI button for it.
+- ⭐ **Wiping all data** (`DELETE /api/preferences`) works freely on the in-memory store. On Supabase it needs `RESET_TOKEN` + an `x-reset-token` header, so nobody with the shared WhatsApp link can wipe everyone's data. There's no UI button for it.
 - **No auth**, per the PRD. Anyone with the link can submit or confirm as any of the 5 names. That's accepted for a 5-friend MVP.
 
 ## UI
